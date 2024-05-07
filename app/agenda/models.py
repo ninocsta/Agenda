@@ -38,3 +38,14 @@ class Events(models.Model):
     professional = models.ForeignKey(Profissional, on_delete=models.CASCADE, default='1')
     service = models.ForeignKey(Service, on_delete=models.CASCADE, default='1')
     observation = models.TextField(null=True,blank=True)
+
+    status_choices = (
+        ("P", "Pendente"),
+        ("E", "Em andamento"),              
+        ("F", "Faltou"),     
+        ("C", "Cancelado"),     
+        ("R", "Realizado"),
+        ("B", "Bloqueado"),
+    )
+
+    status = models.CharField(max_length=1, choices=status_choices, default='P')

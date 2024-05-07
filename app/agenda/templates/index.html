@@ -5,10 +5,11 @@
 {% block content %}
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
    <!-- jQuery UI -->
-   <link href="https://code.jquery.com/ui/1.12.0/themes/flick/jquery-ui.css" rel="stylesheet" />
-   <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
    
   <!-- Moment.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
@@ -23,10 +24,16 @@
 
 
 <!-- FullCalendar JS -->
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.11/index.global.min.js'></script>
+
+<!--Resources -->
 
 
-<div class="col-md-12">  
+
+
+
+  
+<div class="col-md-12 col-10">  
   <div id='calendar'></div>
 
 
@@ -194,27 +201,31 @@
     document.addEventListener('DOMContentLoaded', function () {
       var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
-
+        schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          right: 'timeGridWeek,timeGridDay,listWeek'
         },
-        initialView: window.innerWidth < 800 ? 'timeGridDay' : 'timeGridWeek',
+      // initialView: window.innerWidth < 650 ? 'timeGridDay' : 'timeGridWeek',
+        initialView: 'resourceTimeGridDay',
         locale: 'pt-br',
-        timeZone: 'local',
+        timeZone: 'America/Sao_Paulo',
         events: '/all_events',
+        resources: '/all_resources',
         selectable: true,
         editable: true,
-        // adicionar evento
-        //   dateClick: function(info) {
-        //   alert('Date: ' + info.dateStr);
-        //       if (info.resource) {
-        //           alert('Resource ID: ' + info.resource.id);
-        //         }
-        //    },
-        select: function (info) {
+        longPressDelay: 80,
+        height: 800,
+        buttonText: {
+          today: 'Hoje',
+          month: 'Mês',
+          week: 'Semana',
+          day: 'Dia',
+          list: 'Lista'
+        },           
 
+        select: function (info) {
           $('#addEventModal').on('show.bs.modal', function () {
             // Set the initial values for start date and end date
             var date = moment(info.startStr); // Create a moment object from the date string
@@ -258,42 +269,44 @@
         },
 
         // resize do evento 
-        eventResize: function (event) {
-          var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
-          var title = event.title;
-          var id = event.id;
+        eventResize: function (info) {
+          console.log(info);
+          var start = moment(info.event.start).format("YYYY-MM-DD HH:mm:ss");
+          var end = moment(info.event.end).format("YYYY-MM-DD HH:mm:ss");
+          var id = info.event.id
           $.ajax({
             type: "GET",
             url: '/update',
-            data: { 'title': title, 'start': start, 'end': end, 'id': id },
+            data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
-              calendar.fullCalendar('refetchEvents');
-              alert('Event Update');
+                  $('#successModal .modal-body').html('Alterado com sucesso!');
+                  $('#successModal').modal('show');
             },
             error: function (data) {
-              alert('There is a problem!!!');
+                $('#successModal .modal-body').html('Erro');
+                $('#successModal').modal('show');
             }
           });
         },
         // mover evento
-        eventDrop: function (event) {
-          var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-          var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+        eventDrop: function (info) {
+          var start = moment(info.event.start).format("YYYY-MM-DD HH:mm:ss");
+          var end = moment(info.event.end).format("YYYY-MM-DD HH:mm:ss");
           var title = event.title;
-          var id = event.id;
+          var id = info.event.id
           $.ajax({
             type: "GET",
             url: '/update',
-            data: { 'title': title, 'start': start, 'end': end, 'id': id },
+            data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
-              calendar.fullCalendar('refetchEvents');
-              alert('Event Update');
+              $('#successModal .modal-body').html('Alterado com sucesso!');
+              $('#successModal').modal('show');
             },
             error: function (data) {
-              alert('There is a problem!!!');
+              $('#successModal .modal-body').html('Erro');
+              $('#successModal').modal('show');
             }
           });
         },
@@ -325,7 +338,7 @@
         },
 
       });
-
+      
       calendar.render();
     });
 

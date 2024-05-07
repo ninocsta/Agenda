@@ -4,7 +4,7 @@ from agenda.models import Events
 from django.contrib.auth.decorators import login_required
 from agenda.models import Profissional, Client, Service
 from agenda.forms import EventForm
-
+from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 
 # Create your views here.
@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 # Create your views here.
 @login_required(login_url='/login')
 def index(request):  
-    all_events = Events.objects.all()
+    all_events = Events.objects.all().exclude(status='R')
     profissionais = Profissional.objects.all()
     servicos = []
     clientes = Client.objects.all()
@@ -63,20 +63,33 @@ def load_funcoes_dados_servicos(request):
 
 @login_required(login_url='/login')
 def all_events(request):                                                                                                 
-    all_events = Events.objects.all()                                                                                    
+    all_events = Events.objects.all().exclude(status='R')                                                                               
     out = []                                                                                                             
-    for event in all_events:                                                                                             
+    for event in all_events:
+        #if event.status == 'F':
+     #       color = 'gray'  # ou qualquer outra cor para status 'F'
         out.append({                                                                                                   
                                                                                         
             'id': event.id,
             'title': event.client.name,
             'start': event.start,                                                         
             'end': event.end,
-            'client': event.client.name,                                                   
+            'resourceId': event.professional.id,
+            'description': event.service.description,
+           # 'color': color,                                                
         })                                                                                                               
                                                                                                                       
     return JsonResponse(out, safe=False) 
  
+def all_resources(request):
+    profissionais = Profissional.objects.all()
+    out = []
+    for profissional in profissionais:
+        out.append({
+            'id': profissional.id,
+            'title': profissional.name,
+        })
+    return JsonResponse(out, safe=False)
 
 @login_required(login_url='/login')
 def add_event(request):
@@ -104,13 +117,12 @@ def add_event(request):
 @login_required(login_url='/login')
 def update(request):
     start = request.GET.get("start", None)
-    end = request.GET.get("end", None)
-    title = request.GET.get("title", None)
+    end = request.GET.get("end", None)    
     id = request.GET.get("id", None)
-    event = Events.objects.get(id=id)
+    print(id,start,end)
+    event = get_object_or_404(Events, id=id)
     event.start = start
     event.end = end
-    event.name = title
     event.save()
     data = {}
     return JsonResponse(data)

@@ -1,0 +1,39 @@
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/fullcalendar.min.js"></script>
+<script src="jquery.datetimepicker.full.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/fullcalendar.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/fullcalendar.print.css" rel="stylesheet" media="print" /> 
+<style type="text/css">
+   /* the 'fix' for the datepicker when using jquery layout */
+   #ui-datepicker-div { z-index: 5; }
+</style>
+<script type='text/javascript'>
+   $(document).ready(function() {
+
+       InitializeCalendar();
+       $('.fc-center').append('<input type="date" id="a" ></input>');
+
+           onChangeDateTime:function(current_time,$a){
+               console.log(current_time);
+               $('#calendar').fullCalendar('gotoDate', current_time);
+           }
+       });
+   
+
+function InitializeCalendar()
+{
+    $('#calendar').fullCalendar
+     ({})       
+}
+</script>
+</head>
+<body>
+<div id='calendar'></div>
+</body>
+</html>
