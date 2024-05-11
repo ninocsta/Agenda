@@ -72,8 +72,24 @@ def all_events(request):
     all_events = Events.objects.all().exclude(status='C')                                                                               
     out = []                                                                                                             
     for event in all_events:
-        #if event.status == 'F':
-     #       color = 'gray'  # ou qualquer outra cor para status 'F'
+        if event.status == 'F':
+            color = 'gray'  # ou qualquer outra cor para status 'F'
+        elif event.status == 'P':
+            color = '#8CBEB2'
+        elif event.status == 'E':
+            color = 'orange'
+        elif event.status == 'R':
+            color = 'green'
+        elif event.status == 'B':
+            color = 'black'
+        else:
+            color = 'yellow'
+           
+
+
+
+
+
         diference= event.end - event.start
         minutes = diference.total_seconds() / 60
         out.append({                                                                                                   
@@ -92,7 +108,7 @@ def all_events(request):
             'time_min': event.service.time_min,  
             'minutes': minutes,      
             'status': event.status, 
-           # 'color': color,                                                
+            'color': color,    
         })                                                                                                        
                                                                                                                       
     return JsonResponse(out, safe=False) 

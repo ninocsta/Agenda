@@ -210,35 +210,7 @@
 
 
 
-  <!-- Success Modal -->
-  <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <!-- Success message will be inserted here -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Error Modal -->
-  <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <!-- Error message will be inserted here -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
 
   <script>
@@ -249,12 +221,12 @@
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'timeGridWeek,timeGridDay,listWeek'
+          
         },
         // initialView: window.innerWidth < 650 ? 'timeGridDay' : 'timeGridWeek',
         initialView: 'resourceTimeGridDay',
         locale: 'pt-br',
-        timeZone: 'America/Sao_Paulo',
+        timeZone: 'America/Sao_Paulo',        
         events: '/all_events',
         resources: '/all_resources',
         selectable: true,
@@ -263,9 +235,6 @@
         height: 800,
         buttonText: {
           today: 'Hoje',
-          month: 'Mês',
-          week: 'Semana',
-          day: 'Dia',
           list: 'Lista'
         },
 
@@ -301,16 +270,20 @@
                 dataType: "json",
                 success: function (data) {
                   calendar.refetchEvents();
-                  Swal.fire({                    
+                  Swal.fire({
                     text: "Criado com sucesso!",
                     icon: "success",
                     showConfirmButton: false,
-                    timer: 1000
+                    timer: 1200
                   });
                 },
                 error: function (data) {
-                  $('#successModal .modal-body').html('Erro');
-                  $('#successModal').modal('show');
+                  Swal.fire({
+                    text: "Erro!",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
                 }
               });
               $('#addEventModal').modal('hide');
@@ -331,17 +304,25 @@
             data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
-              $('#successModal .modal-body').html('Alterado com sucesso!');
-              $('#successModal').modal('show');
+              Swal.fire({
+                    text: "Ajustado com sucesso!",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
             },
             error: function (data) {
-              $('#errorModal .modal-body').html('Erro');
-              $('#errorModal').modal('show');
+              Swal.fire({
+                    text: "Erro!",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
             }
           });
         },
         // mover evento
-        eventDrop: function (info) {          
+        eventDrop: function (info) {
           var startStr = moment.utc(info.event.start);
           var start = startStr.format('YYYY-MM-DDTHH:mm');
           var endStr = moment.utc(info.event.end);
@@ -353,12 +334,20 @@
             data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
-              $('#successModal .modal-body').html('Alterado com sucesso!');
-              $('#successModal').modal('show');
+              Swal.fire({
+                    text: "Movido com sucesso!",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
             },
             error: function (data) {
-              $('#errorModal .modal-body').html('Erro');
-              $('#errorModal').modal('show');
+              Swal.fire({
+                    text: "Erro!",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
             }
           });
         },
@@ -394,12 +383,20 @@
               dataType: "json",
               success: function (data) {
                 calendar.refetchEvents();
-                $('#successModal .modal-body').html('Evento Atualizado!');
-                $('#successModal').modal('show');
+                Swal.fire({
+                    text: "Alterado com sucesso!",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
               },
               error: function (data) {
-                $('#errorModal .modal-body').html('There is a problem!!!');
-                $('#errorModal').modal('show');
+                Swal.fire({
+                    text: "Erro!",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1200
+                  });
               }
             });
             $('#editEventModal').modal('hide');
@@ -449,12 +446,15 @@
             $('#servico_id, #edit_servico_id').append(option);
           });
 
-          // Trigger the change event
-          $("#servico_id").trigger('change');
+          // Trigger the change event only if the modal is open
+          if ($('#editEventModal').hasClass('show')) {
+            $("#edit_servico_id").trigger('change');
+          } else {
+            $("#servico_id").trigger('change');
+          }
         }
       });
     });
-
   </script>
   <!-- chamda do tempo do servico após selecionar o servico na criação-->
   <script type="text/javascript">
