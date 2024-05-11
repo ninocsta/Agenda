@@ -27,9 +27,13 @@
 <!-- FullCalendar JS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.11/index.global.min.js'></script>
 
-<!--Resources -->
+<!--Sweet Alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <!-- momentr tz -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+
 
 
 
@@ -140,7 +144,7 @@
 
 
             <div class="form-group">
-              <label class="control-label" for="client">Cliente</label>
+              <label class="control-label" for="editclientpicker">Cliente</label>
               <select class="selectpicker form-control" data-live-search="true" id="editclientpicker">
                 <option value="">Selecione</option>
                 {% for client in clientes %}
@@ -185,11 +189,19 @@
               <label for="obs" class="control-label">Observação</label>
               <textarea name="obs" id="edit_obs" class="form-control"></textarea>
             </div>
+            <div class="form-group">
+              <label class="control-label" for="edit_status">Status</label>
+              <select class="selectpicker form-control" name="status" id="edit_status">
+                {% for value, name in status_choices %}
+                <option value="{{ value }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </form>
 
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="addEventBtn">Adicionar</button>
+          <button type="button" class="btn btn-primary" id="editEventBtn">Confirmar</button>
         </div>
       </div>
     </div>
@@ -222,7 +234,7 @@
           <!-- Error message will be inserted here -->
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -289,8 +301,12 @@
                 dataType: "json",
                 success: function (data) {
                   calendar.refetchEvents();
-                  $('#successModal .modal-body').html('Adicionado com sucesso!');
-                  $('#successModal').modal('show');
+                  Swal.fire({                    
+                    text: "Criado com sucesso!",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 1000
+                  });
                 },
                 error: function (data) {
                   $('#successModal .modal-body').html('Erro');
@@ -304,14 +320,14 @@
 
         // resize do evento 
         eventResize: function (info) {
-          console.log(info);
-          var start = moment(info.event.start).tz("America/Sao_Paulo").format("YYYY-MM-DD HH:mm:ss");
-          console.log(start)
-          var end = moment(info.event.end).tz("America/Sao_Paulo").format("YYYY-MM-DD HH:mm:ss");
-          var id = info.event.id
+          var startStr = moment.utc(info.event.start);
+          var start = startStr.format('YYYY-MM-DDTHH:mm');
+          var endStr = moment.utc(info.event.end);
+          var end = endStr.format('YYYY-MM-DDTHH:mm');
+          var id = info.event.id;
           $.ajax({
             type: "GET",
-            url: '/update',
+            url: '/move',
             data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
@@ -319,20 +335,21 @@
               $('#successModal').modal('show');
             },
             error: function (data) {
-              $('#successModal .modal-body').html('Erro');
-              $('#successModal').modal('show');
+              $('#errorModal .modal-body').html('Erro');
+              $('#errorModal').modal('show');
             }
           });
         },
         // mover evento
-        eventDrop: function (info) {
-          var start = moment(info.event.start).format("YYYY-MM-DD HH:mm:ss");
-          var end = moment(info.event.end).format("YYYY-MM-DD HH:mm:ss");
-
-          var id = info.event.id
+        eventDrop: function (info) {          
+          var startStr = moment.utc(info.event.start);
+          var start = startStr.format('YYYY-MM-DDTHH:mm');
+          var endStr = moment.utc(info.event.end);
+          var end = endStr.format('YYYY-MM-DDTHH:mm');
+          var id = info.event.id;
           $.ajax({
             type: "GET",
-            url: '/update',
+            url: '/move',
             data: { 'start': start, 'end': end, 'id': id },
             dataType: "json",
             success: function (data) {
@@ -340,8 +357,8 @@
               $('#successModal').modal('show');
             },
             error: function (data) {
-              $('#successModal .modal-body').html('Erro');
-              $('#successModal').modal('show');
+              $('#errorModal .modal-body').html('Erro');
+              $('#errorModal').modal('show');
             }
           });
         },
@@ -349,33 +366,43 @@
         eventClick: function (info) {
           $('#event_id').text(info.event.id);
           $('#editEventModal #editStartDate').val(info.event.startStr);
-
-          $('#editclientpicker').val(info.event.extendedProps.client_id);
-          $('#editclientpicker').selectpicker('refresh');
           var professionalElement = $(document.getElementsByClassName('profissional_id')[1]);
           professionalElement.val(info.event.extendedProps.professional_id);
           professionalElement.change();  // Dispara o evento de mudança manualmente 
           $('#edit_obs').val(info.event.extendedProps.observation);
-          $('#editEventModal').modal('show');
+          $('#edittimeMinInput').val(info.event.extendedProps.minutes);
+          console.log('colocou o valor no edit')
+          $('#editclientpicker').val(info.event.extendedProps.client_id);
+          $('#edit_status').val(info.event.extendedProps.status);
+          $('#edit_status, #editclientpicker').selectpicker('refresh');
 
-          $('#confirmBtn').off('click').on('click', function () {
-            var id = event.id;
+          $('#editEventModal').modal('show');
+          $('#editEventBtn').off('click').on('click', function () {
+            var id = info.event.id;
+            var startDate = $('#editStartDate').val();
+            var client = $('#editclientpicker').val();
+            var profissional = $('#edit_profissional_id').val();
+            var servico = $('#edit_servico_id').val();
+            var timeMinInput = $('#edittimeMinInput').val();
+            var obs = $('#edit_obs').val();
+            var status = $('#edit_status').val();
+
             $.ajax({
               type: "GET",
-              url: '/remove',
-              data: { 'id': id },
+              url: '/update',
+              data: { 'id': id, 'start': startDate, 'client': client, 'profissional': profissional, 'servico': servico, 'timeMin': timeMinInput, 'obs': obs, 'status': status },
               dataType: "json",
               success: function (data) {
-                calendar.fullCalendar('refetchEvents');
-                $('#myModal .modal-body').html('Event Removed');
-                $('#myModal').modal('show');
+                calendar.refetchEvents();
+                $('#successModal .modal-body').html('Evento Atualizado!');
+                $('#successModal').modal('show');
               },
               error: function (data) {
-                $('#myModal .modal-body').html('There is a problem!!!');
-                $('#myModal').modal('show');
+                $('#errorModal .modal-body').html('There is a problem!!!');
+                $('#errorModal').modal('show');
               }
             });
-            $('#confirmModal').modal('hide');
+            $('#editEventModal').modal('hide');
           });
           // }
         },
@@ -396,7 +423,6 @@
       var url = $("#form").attr("data-funcoes-url");
       var profissionalId = $(this).val();
       var event = $("#event_id").text();
-      console.log('evento ativado')
       $.ajax({
         url: url,
         data: {
@@ -424,15 +450,15 @@
           });
 
           // Trigger the change event
-          $("#servico_id, #edit_servico_id").trigger('change');
+          $("#servico_id").trigger('change');
         }
       });
     });
 
   </script>
-  <!-- chamda do tempo do servico após selecionar o servico-->
+  <!-- chamda do tempo do servico após selecionar o servico na criação-->
   <script type="text/javascript">
-    $("#servico_id, #edit_servico_id").change(function () {
+    $("#servico_id").change(function () {
       var url = $("#form").attr("data-dados-url");
       var servicoId = $(this).val();
       $.ajax({
@@ -441,13 +467,27 @@
           'servico_id': servicoId
         },
         success: function (data) {
-
           $('#timeMinInput').val(data.time_min);
+
+        }
+      });
+    });
+  </script>
+  <!-- chamda do tempo do servico após selecionar o servico na hora de editar-->
+  <script type="text/javascript">
+    $("#edit_servico_id").change(function () {
+      var url = $("#form").attr("data-dados-url");
+      var servicoId = $(this).val();
+      $.ajax({
+        url: url,
+        data: {
+          'servico_id': servicoId
+        },
+        success: function (data) {
           $('#edittimeMinInput').val(data.time_min);
         }
       });
     });
-
   </script>
 
 

@@ -34,7 +34,7 @@ class Events(models.Model):
     id = models.AutoField(primary_key=True)    
     start = models.DateTimeField(null=True,blank=True)
     end = models.DateTimeField(null=True,blank=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, default='1')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, default='1') 
     professional = models.ForeignKey(Profissional, on_delete=models.CASCADE, default='1')
     service = models.ForeignKey(Service, on_delete=models.CASCADE, default='1')
     observation = models.TextField(null=True,blank=True)

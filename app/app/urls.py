@@ -17,7 +17,7 @@ urlpatterns = [
     path('all_resources/', views.all_resources, name='all_resources'), 
     path('add_event/', views.add_event, name='add_event'), 
     path('update/', views.update, name='update'),
-    path('remove/', views.remove, name='remove'),
+    path('move/', views.move, name='move'),
     path('login/', accounts_views.login_view, name='login'),
     path('logout/', accounts_views.logout_view, name='logout'),    
 ]
