@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse 
-from agenda.models import Events 
 from django.contrib.auth.decorators import login_required
-from agenda.models import Profissional, Client, Service
+from agenda.models import Profissional, Client, Service, Events
 from agenda.forms import EventForm
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
@@ -35,14 +34,20 @@ def load_funcoes_servicos_profissional(request):
     profissional_id = request.GET.get('profissional_id')
     profissional = Profissional.objects.get(id=profissional_id)
     servicos = profissional.services.all().order_by('description')
+    event_id = request.GET.get('event')
+    servico_do_evento = None  # Initialize servico_do_evento
+    if event_id:
+        event_id = Events.objects.get(id=event_id)
+        servico_do_evento = event_id.service.id
+        print(servico_do_evento)
 
     out = []
     for servico in servicos:
         out.append({
             'id': servico.id,
             'description': servico.description,
-            'time_min': servico.time_min,
-            # Add other fields as needed
+            'time_min': servico.time_min,    
+            'selected': servico.id == servico_do_evento,  # Set selected to True if servico is the same as servico_do_evento      
         })
 
     return JsonResponse(out, safe=False)
@@ -81,6 +86,7 @@ def all_events(request):
             'client_id': event.client.id,
             'professional_id': event.professional.id,
             'servico_id': event.service.id,
+            'observation': event.observation,
            # 'color': color,                                                
         })                                                                                                               
                                                                                                                       
