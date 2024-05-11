@@ -27,8 +27,8 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.11/index.global.min.js'></script>
 
 <!--Resources -->
-
-
+<!-- momentr tz -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
 
 
 
@@ -37,7 +37,7 @@
   <div id='calendar'></div>
 
 
-  <!-- Modal -->
+  <!-- Criar Evento Modal -->
   <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="addEventModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -70,7 +70,7 @@
             <div class="form-group">
               <label class="control-label" for="profissional_id">Profissional</label>
               <div>
-                <select name="profissional_id" required id="profissional_id" class="form-control">
+                <select name="profissional_id" required id="profissional_id" class="form-control profissional_id">
                   <option value="">Selecione</option>
                   {% for profissional in profissionais %}
                   <option value="{{ profissional.id }}">
@@ -84,7 +84,7 @@
             <div class="form-group">
               <label class="control-label" for="servico_id">Serviço</label>
               <div>
-                <select name="servico_id" required id="servico_id" class="form-control">
+                <select name="servico_id" required id="servico_id" class="form-control servico_id">
                   <option value="">Selecione</option>
                   {% for servico in servicos %}
                   <option value="{{ servico.id }}" data-time-min="{{ servico.time_min }}">{{ servico.description }}</option>
@@ -111,6 +111,84 @@
       </div>
     </div>
   </div>
+
+  <!-- Editar Modal -->
+  <div class="modal fade" id="editEventModal" tabindex="-1" role="dialog" aria-labelledby="editEventModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="addEventModalLabel">Editar Evento</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form name="Form" id="form" action="" data-funcoes-url="{% url 'ajax_load_funcoes' %}"
+          data-dados-url="{% url 'ajax_load_dados' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label for="eventStart">Data</label>
+              <input type="datetime-local" class="form-control" id="editStartDate" placeholder="Enter Start Date">
+            </div>
+
+
+            <div class="form-group">
+              <label class="control-label" for="client">Cliente</label>
+              <select class="selectpicker form-control" data-live-search="true" id="editclientpicker">
+                <option value="">Selecione</option>
+                {% for client in clientes %}
+                <option value="{{ client.id }}">{{ client.name }} - {{ client.fone }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="profissional_id">Profissional</label>
+              <div>
+                <select name="professional_id" required id="edit_profissional_id" class="form-control profissional_id">
+                  <option value="">Selecione</option>
+                  {% for profissional in profissionais %}
+                  <option value="{{ profissional.id }}">
+                    {{ profissional.name }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="servico_id">Serviço</label>
+              <div>
+                <select name="servico_id" required id="edit_servico_id" class="form-control servico_id">
+                  <option value="">Selecione</option>
+                  {% for servico in servicos %}
+                  <option value="{{ servico.id }}" data-time-min="{{ servico.time_min }}">{{ servico.description }}</option>
+                  {% endfor %}
+                </select>                
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="servico_time_min">Duração (Minutos)</label>
+              <input id="timeMinInput" type="text" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="obs" class="control-label">Observação</label>
+              <textarea name="obs" id="obs" class="form-control"></textarea>
+            </div>
+          </form>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="addEventBtn">Adicionar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
 
   <!-- Success Modal -->
   <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
@@ -146,10 +224,10 @@
 
   <!-- chamda dos serviços após selecionar o profissional-->
   <script type="text/javascript">
-    $("#profissional_id").change(function () {
+    $(".profissional_id, .edit_profissional_id").change(function () {
       var url = $("#form").attr("data-funcoes-url");
       var profissionalId = $(this).val();
-
+      console.log('evento ativado')
       $.ajax({
         url: url,
         data: {
@@ -157,17 +235,21 @@
         },
         success: function (data) {
           // Clear the select options
-          $("#servico_id").empty();
+          $("#servico_id, #edit_servico_id").empty();
 
           // Add new options to the select
           $.each(data, function (i, item) {
-            $('#servico_id').append($('<option>', {
+            console.log('input')
+            $('#servico_id, #edit_servico_id').append($('<option>', {
               value: item.id,
               text: item.description
             }));
           });
-          // Trigger the change event
-          $("#servico_id").change();
+
+          console.log('triger');
+          // Open the modal here
+          $('#editEventModal').modal('show');
+
         }
       });
     });
@@ -190,11 +272,6 @@
     });
 
   </script>
-
-
-
-
-
 
 
   <script>
@@ -271,8 +348,9 @@
         // resize do evento 
         eventResize: function (info) {
           console.log(info);
-          var start = moment(info.event.start).format("YYYY-MM-DD HH:mm:ss");
-          var end = moment(info.event.end).format("YYYY-MM-DD HH:mm:ss");
+          var start = moment(info.event.start).tz("America/Sao_Paulo").format("YYYY-MM-DD HH:mm:ss");
+          console.log(start)
+          var end = moment(info.event.end).tz("America/Sao_Paulo").format("YYYY-MM-DD HH:mm:ss");
           var id = info.event.id
           $.ajax({
             type: "GET",
@@ -293,7 +371,7 @@
         eventDrop: function (info) {
           var start = moment(info.event.start).format("YYYY-MM-DD HH:mm:ss");
           var end = moment(info.event.end).format("YYYY-MM-DD HH:mm:ss");
-          var title = event.title;
+
           var id = info.event.id
           $.ajax({
             type: "GET",
@@ -310,10 +388,28 @@
             }
           });
         },
-        // remover evento
-        eventClick: function (event) {
-          // if (confirm("Are you sure you want to remove it?")) {
-          $('#confirmModal').modal('show');
+        // Editar evento
+        eventClick: function (info) {
+        $('#editEventModal #editStartDate').val(info.event.startStr);
+        $('#editclientpicker').val(info.event.extendedProps.client_id);
+        $('#editclientpicker').selectpicker('refresh');
+        var professionalElement = $(document.getElementsByClassName('profissional_id')[1]);
+        professionalElement.val(info.event.extendedProps.professional_id);
+        professionalElement.change();  // Dispara o evento de mudança manualmente
+        
+        var servicoElement = $(document.getElementsByClassName('servico_id')[1]);
+        //servicoElement.val(info.event.extendedProps.servico_id);
+        console.log(info.event.extendedProps.servico_id);
+
+       // $(document.getElementsByClassName('servico_id')[1]);
+      //  professionalElement.val(info.event.extendedProps.servico_id);
+       // console.log(info.event.extendedProps.servico_id);
+        //$('#servico_id').val(info.event.extendedProps.servico_id).change();
+        //console.log(info.event.extendedProps.servico_id);
+        
+
+          //$('#editEventModal').modal('show');
+         // console.log('mostrou o modal')
 
           $('#confirmBtn').off('click').on('click', function () {
             var id = event.id;

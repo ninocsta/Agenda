@@ -6,6 +6,7 @@ from agenda.models import Profissional, Client, Service
 from agenda.forms import EventForm
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
+from django.views.generic import ListView, UpdateView, CreateView, DetailView, DeleteView
 
 # Create your views here.
 
@@ -76,6 +77,10 @@ def all_events(request):
             'end': event.end,
             'resourceId': event.professional.id,
             'description': event.service.description,
+            'client': event.client.name,
+            'client_id': event.client.id,
+            'professional_id': event.professional.id,
+            'servico_id': event.service.id,
            # 'color': color,                                                
         })                                                                                                               
                                                                                                                       
@@ -126,6 +131,19 @@ def update(request):
     event.save()
     data = {}
     return JsonResponse(data)
+
+
+class UpdateEvent(UpdateView):
+    model = Events
+    form_class = EventForm
+
+    success_url = '/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profissionais'] = Profissional.objects.all()
+        context['clientes'] = Client.objects.all()
+        return context
 
 
 @login_required(login_url='/login')
