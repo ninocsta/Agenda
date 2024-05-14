@@ -15,8 +15,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
 
 <!-- Bootstrap CSS/JS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <!-- Bootstrap-Select CSS/JS -->
 <link rel="stylesheet"
@@ -39,65 +39,84 @@
 <!-- PURE CSS -->
 
 <style>
-  .ui-datepicker{
+  .ui-datepicker {
     margin: 2px;
+    background-color: rgb(255, 238, 238);
+    border-radius: 4px;
+    border-style: solid;
   }
-.ui-datepicker a{
-  text-decoration: none;
-}
-.ui-datepicker-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.ui-datepicker-title{
-  font-size: 18px;
-  font-weight: bold;
-  align-self: center;
-}
-.ui-datepicker-prev, .ui-datepicker-next{
-  cursor: pointer;  
-  color: black;
-  padding: 2px;
-  border-radius: 4px;
-}
-.ui-datepicker-prev {
-  order: 1;
-}
+  .ui-datepicker a {
+    text-decoration: none;
+  }
 
-.ui-datepicker-title {
-  order: 2;
-}
+  .ui-datepicker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-.ui-datepicker-next {
-  order: 3;
-}
-.ui-datepicker td, .ui-datepicker th{
-  text-align: center;
-  width: 40px;
-  height: 20px;
+  .ui-datepicker-title {
+    font-size: 18px;
+    font-weight: bold;
+    align-self: center;
+  }
 
-}
-.ui-datepicker td{
-  cursor: pointer;
-  border-radius: 4px;
-  border-style: solid;
-  border-color: black;
-  
-}
-.ui-datepicker td:hover{
-  background-color: rgba(85, 131, 201, 0.445);
-  padding: 2px;
-}
-.ui-state-default{
-  color: #000;
-}
+  .ui-datepicker-prev,
+  .ui-datepicker-next {
+    cursor: pointer;
+    color: black;
+    padding: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 4px;
+  }
 
+  .ui-datepicker-prev {
+    order: 1;
+  }
 
+  .datepicker table tr td,
+  .datepicker table tr th {
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    border: none;
+  }
 
+  .ui-datepicker-title {
+    order: 2;
+  }
 
+  .ui-datepicker-next {
+    order: 3;
+  }
 
+  .ui-datepicker td,
+  .ui-datepicker th {
+    text-align: center;
+    width: 40px;
+    height: 20px;
+
+  }
+
+  .ui-datepicker td {
+    cursor: pointer;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: black;
+    padding: 2px;
+
+  }
+
+  .ui-datepicker td:hover {
+    background-color: rgba(85, 131, 201, 0.445);
+  }
+
+  .ui-state-default {
+    color: #000;
+  }
 </style>
 
 
@@ -298,6 +317,27 @@
         longPressDelay: 80,
         expandRows: true,
         height: 800,
+        eventClassNames: ['container', 'text-center',],
+        eventContent: function (info) {
+          var startTime = new Date(info.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+          var endTime = new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
+          var client = info.event.extendedProps.client;
+          var service = info.event.extendedProps.description;
+          
+          return {
+            html: `
+      <div class="row">
+        <div class="col text-center ">${info.event.title} - ${service}</div>
+        <div class="w-100"></div>
+        <div class="col text-center">${startTime} - ${endTime}</div>        
+      </div>
+    `
+          };
+        },
+        buttonText: {
+          today: 'Hoje',
+          list: 'Lista'
+        },
         buttonText: {
           today: 'Hoje',
           list: 'Lista'
@@ -429,7 +469,7 @@
           $('#editclientpicker').val(info.event.extendedProps.client_id);
           $('#edit_status').val(info.event.extendedProps.status);
           $('#edit_status, #editclientpicker').selectpicker('refresh');
-
+          console.log(info)
           $('#editEventModal').modal('show');
           $('#editEventBtn').off('click').on('click', function () {
             var id = info.event.id;
@@ -478,7 +518,9 @@
             calendar.gotoDate(d); // Use FullCalendar's API directly
           },
           dayNamesMin: ["S", "T", "Q", "Q", "S", "S", "D"],
-          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],          
+          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+          prevText: "«",
+          nextText: "»"
         });
       });
       calendar.render();
