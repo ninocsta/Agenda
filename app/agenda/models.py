@@ -17,6 +17,7 @@ class Profissional(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     services = models.ManyToManyField('Service', related_name='services')
+    foto = models.ImageField(upload_to='fotos', null=True, blank=True)
 
     def __str__(self):
         return self.name

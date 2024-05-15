@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 
 
 {% block content %}
@@ -15,8 +15,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
 
 <!-- Bootstrap CSS/JS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <!-- Bootstrap-Select CSS/JS -->
 <link rel="stylesheet"
@@ -36,92 +38,20 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+
+<!-- Datepicker  -->
+<script src="{% static 'bootstrap-datepicker-1.9.0-dist/js/bootstrap-datepicker.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'bootstrap-datepicker-1.9.0-dist/css/bootstrap-datepicker3.min.css' %}">
+
 <!-- PURE CSS -->
 
 <style>
-  .ui-datepicker {
-    margin: 2px;
-    background-color: rgb(255, 238, 238);
-    border-radius: 4px;
-    border-style: solid;
-  }
 
-  .ui-datepicker a {
-    text-decoration: none;
-  }
-
-  .ui-datepicker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .ui-datepicker-title {
-    font-size: 18px;
-    font-weight: bold;
-    align-self: center;
-  }
-
-  .ui-datepicker-prev,
-  .ui-datepicker-next {
-    cursor: pointer;
-    color: black;
-    padding: 4px;
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 4px;
-  }
-
-  .ui-datepicker-prev {
-    order: 1;
-  }
-
-  .datepicker table tr td,
-  .datepicker table tr th {
-    text-align: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    border: none;
-  }
-
-  .ui-datepicker-title {
-    order: 2;
-  }
-
-  .ui-datepicker-next {
-    order: 3;
-  }
-
-  .ui-datepicker td,
-  .ui-datepicker th {
-    text-align: center;
-    width: 40px;
-    height: 20px;
-
-  }
-
-  .ui-datepicker td {
-    cursor: pointer;
-    border-radius: 4px;
-    border-style: solid;
-    border-color: black;
-    padding: 2px;
-
-  }
-
-  .ui-datepicker td:hover {
-    background-color: rgba(85, 131, 201, 0.445);
-  }
-
-  .ui-state-default {
-    color: #000;
-  }
 </style>
 
 
-<div class="col-2" id="datepicker"></div>
-<div class="col-10">
+<div class="col-2 datepicker" id="datepicker"></div>
+<div class="col-12 col-md-10">
   <div id='calendar'></div>
 
 
@@ -141,13 +71,13 @@
 
 
             <div class="form-group">
-              <label for="eventStart">Data</label>
+              <label for="startDate">Data</label>
               <input type="datetime-local" class="form-control" id="startDate" placeholder="Enter Start Date">
             </div>
 
 
             <div class="form-group">
-              <label class="control-label" for="client">Cliente</label>
+              <label class="control-label" for="clientinput">Cliente</label>
               <select class="selectpicker form-control" data-live-search="true" id="clientinput">
                 <option value="">Selecione</option>
                 {% for client in clientes %}
@@ -184,7 +114,7 @@
             </div>
 
             <div class="form-group">
-              <label class="control-label" for="servico_time_min">Duração (Minutos)</label>
+              <label class="control-label" for="timeMinInput">Duração (Minutos)</label>
               <input id="timeMinInput" type="text" class="form-control">
             </div>
 
@@ -221,7 +151,7 @@
             </div>
 
             <div class="form-group">
-              <label for="eventStart">Data</label>
+              <label for="editStartDate">Data</label>
               <input type="datetime-local" class="form-control" id="editStartDate" placeholder="Enter Start Date">
             </div>
 
@@ -264,7 +194,7 @@
             </div>
 
             <div class="form-group">
-              <label class="control-label" for="servico_time_min">Duração (Minutos)</label>
+              <label class="control-label" for="edittimeMinInput">Duração (Minutos)</label>
               <input id="edittimeMinInput" type="text" class="form-control">
             </div>
 
@@ -302,8 +232,9 @@
       var calendar = new FullCalendar.Calendar(calendarEl, {
         schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         headerToolbar: {
-          left: 'prev,next today',
+          left: '',
           center: 'title',
+          right: '',
 
         },
         // initialView: window.innerWidth < 650 ? 'timeGridDay' : 'timeGridWeek',
@@ -317,13 +248,14 @@
         longPressDelay: 80,
         expandRows: true,
         height: 800,
+        expandRows: true,
         eventClassNames: ['container', 'text-center',],
         eventContent: function (info) {
           var startTime = new Date(info.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-          var endTime = new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
+          var endTime = new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
           var client = info.event.extendedProps.client;
           var service = info.event.extendedProps.description;
-          
+
           return {
             html: `
       <div class="row">
@@ -511,16 +443,15 @@
 
       });
       $(document).ready(function () {
-        $('#datepicker').datepicker({
-          inline: true,
-          onSelect: function (dateText, inst) {
-            var d = new Date(dateText);
-            calendar.gotoDate(d); // Use FullCalendar's API directly
-          },
-          dayNamesMin: ["S", "T", "Q", "Q", "S", "S", "D"],
-          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
-          prevText: "«",
-          nextText: "»"
+        $('.datepicker').datepicker({
+          format: 'dd/mm/yyyy',
+          language: 'pt-BR',
+          todayHighlight: true,
+          todayBtn: 'linked',
+          orientation: 'bottom'
+        }).on('changeDate', function (e) {
+          var d = new Date(e.date);
+          calendar.gotoDate(d); // Use FullCalendar's API directly
         });
       });
       calendar.render();

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-)l#w9+lhswr+6sp1*%+p6pa21gh$b2d3iad+v-+2i+aq3i!e9#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.0.210']
 
 
 # Application definition
@@ -150,5 +150,4 @@ CACHES = {
         }
     }
 }
-# Tell select2 which cache configuration to use:
-SELECT2_CACHE_BACKEND = "select2"
+
